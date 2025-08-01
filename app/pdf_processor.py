@@ -3,7 +3,7 @@ PDF processing module with multi-threading support
 """
 import asyncio
 import aiohttp
-import fitz  # PyMuPDF
+import pymupdf  # =import fitz
 import io
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -149,7 +149,7 @@ class PDFProcessor:
         """
         try:
             # Open PDF document from bytes
-            doc = fitz.open(stream=pdf_content, filetype="pdf")
+            doc = pymupdf.open(stream=pdf_content, filetype="pdf")
             
             if doc.is_encrypted:
                 raise PDFProcessingError("PDF is encrypted and cannot be processed")
@@ -182,7 +182,7 @@ class PDFProcessor:
             
             return full_text
             
-        except fitz.FileDataError:
+        except pymupdf.FileDataError:
             raise PDFProcessingError("Invalid or corrupted PDF file")
         except Exception as e:
             if isinstance(e, PDFProcessingError):

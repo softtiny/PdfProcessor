@@ -157,8 +157,8 @@ class TestPDFProcessor:
     def test_extract_text_from_bytes_success(self):
         """Test successful text extraction from bytes"""
         # This would require a real PDF file for testing
-        # For now, we'll mock the fitz library
-        with patch('fitz.open') as mock_fitz:
+        # For now, we'll mock the pymupdf library
+        with patch('pymupdf.open') as mock_pymupdf:
             mock_doc = MagicMock()
             mock_doc.is_encrypted = False
             mock_doc.page_count = 1
@@ -167,36 +167,36 @@ class TestPDFProcessor:
             mock_page.get_text.return_value = "Sample PDF text content"
             mock_doc.__getitem__.return_value = mock_page
             
-            mock_fitz.return_value = mock_doc
+            mock_pymupdf.return_value = mock_doc
             
             result = self.processor._extract_text_from_bytes(b"mock pdf bytes")
             assert "Sample PDF text content" in result
     
     def test_extract_text_from_bytes_encrypted(self):
         """Test text extraction from encrypted PDF"""
-        with patch('fitz.open') as mock_fitz:
+        with patch('pymupdf.open') as mock_pymupdf:
             mock_doc = MagicMock()
             mock_doc.is_encrypted = True
-            mock_fitz.return_value = mock_doc
+            mock_pymupdf.return_value = mock_doc
             
             with pytest.raises(PDFProcessingError, match="PDF is encrypted"):
                 self.processor._extract_text_from_bytes(b"mock pdf bytes")
     
     def test_extract_text_from_bytes_no_pages(self):
         """Test text extraction from PDF with no pages"""
-        with patch('fitz.open') as mock_fitz:
+        with patch('pymupdf.open') as mock_pymupdf:
             mock_doc = MagicMock()
             mock_doc.is_encrypted = False
             mock_doc.page_count = 0
-            mock_fitz.return_value = mock_doc
+            mock_pymupdf.return_value = mock_doc
             
             with pytest.raises(PDFProcessingError, match="PDF has no pages"):
                 self.processor._extract_text_from_bytes(b"mock pdf bytes")
     
     def test_extract_text_from_bytes_invalid_pdf(self):
         """Test text extraction from invalid PDF"""
-        with patch('fitz.open') as mock_fitz:
-            mock_fitz.side_effect = Exception("Invalid PDF format")
+        with patch('pymupdf.open') as mock_pymupdf:
+            mock_pymupdf.side_effect = Exception("Invalid PDF format")
             
             with pytest.raises(PDFProcessingError, match="PDF processing failed"):
                 self.processor._extract_text_from_bytes(b"invalid pdf bytes")
