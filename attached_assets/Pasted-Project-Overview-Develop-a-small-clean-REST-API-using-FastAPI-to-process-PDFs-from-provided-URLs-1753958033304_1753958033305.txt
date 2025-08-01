@@ -1,0 +1,47 @@
+Project Overview:  
+Develop a small, clean REST API using FastAPI to process PDFs from provided URLs, extract full text content, and return it as JSON. The solution must handle thousands of URLs from various domains, be well-structured, testable, and deployable via Docker.
+
+Core Responsibilities:  
+1. API Development:  
+   - POST /get_text:  
+     - Input: JSON with a URL (e.g., `"url": "https://arxiv.org/pdf/2105.00001.pdf"`)  
+     - Output: JSON with extracted text (e.g., `"text": "Full extracted text..."`)  
+   - GET /health_check:  
+     - Output: JSON with status (e.g., `"status": "ok"`)  
+
+2. PDF Text Extraction:  
+   - Use reliable libraries (e.g., PyMuPDF, pdfminer.six).  
+   - Handle redirects, invalid URLs, and corrupt PDFs gracefully.  
+   - Implement multi-threading for efficient processing of multiple URLs.  
+
+3. Dockerization:  
+   - Provide a working Dockerfile.  
+   - Include README with instructions for running locally and via Docker.  
+
+4. Testing:  
+   - Write unit tests using pytest.  
+   - Cover both endpoints and at least one common error scenario (e.g., invalid URL or corrupt PDF).  
+
+5. Documentation:  
+   - Create a README.md with:  
+     - Requirements (dependencies, libraries).  
+     - Instructions to run locally and with Docker.  
+     - Guide to test endpoints (e.g., using curl or Postman).  
+
+Deliverables:  
+- Git repository with source code.  
+- Dockerfile and requirements.txt.  
+- Comprehensive README.md.  
+- Unit tests (pytest preferred).  
+
+Requirements:  
+- Strong experience with FastAPI and Python.  
+- Familiarity with PDF processing libraries (PyMuPDF, pdfminer.six, etc.).  
+- Knowledge of multi-threading for efficient URL processing.  
+- Experience with Docker and writing testable, clean code.  
+- Proficiency in Git for version control.  
+
+Notes:  
+- The solution must be robust, handling edge cases like invalid URLs or corrupt PDFs.  
+- Multi-threading is critical due to high URL volume.  
+- Code should be modular, maintainable, and production-ready.

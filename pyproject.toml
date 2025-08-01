@@ -1,0 +1,15 @@
+[project]
+name = "PdfProcessor"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.11"
+dependencies = [
+    "aiohttp>=3.12.15",
+    "fastapi>=0.116.1",
+    "httpx>=0.28.1",
+    "pydantic>=2.11.7",
+    "pymupdf>=1.26.3",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0",
+    "uvicorn>=0.35.0",
+]
