@@ -10,6 +10,32 @@ import aiohttp
 from app.pdf_processor import PDFProcessor
 from app.exceptions import PDFProcessingError, URLError, TimeoutError
 
+
+class MockAsyncIterator:
+    def __init__(self, chunks):
+        self.chunks = chunks
+        self.maxidx=len(chunks)
+        self.index = 0
+        self.step=1
+    def __call__(self,step):
+        self.step = step
+        return self
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        if (self.index+self.step) < self.maxidx:
+            result = self.chunks[self.index:(self.index+self.step)]
+            self.index += self.step
+            return b''.join(result)
+        elif self.index < self.maxidx:
+            result = self.chunks[self.index:self.maxidx]
+            self.index = self.maxidx
+            return b''.join(result)
+        raise StopAsyncIteration
+
+
 class TestPDFProcessor:
     """Test PDF processor functionality"""
     
@@ -82,33 +108,31 @@ class TestPDFProcessor:
         mock_response = MagicMock()
         mock_response.status = 200
         mock_response.headers = {'content-type': 'application/pdf', 'content-length': str(len(mock_content))}
-        mock_response.content.iter_chunked = AsyncMock(return_value=[mock_content])
-        print("------------------------------fff>>")
-        print(mock_response)
+        mock_response.content.iter_chunked = MockAsyncIterator([mock_content])
         # mock_session = MagicMock()
         # mock_session.get.return_value.__aenter__.return_value = mock_response
         
         #with patch('aiohttp.ClientSession.get') as mock_function:
         mock_function.return_value.__aenter__.return_value = mock_response
-        #result = await self.processor._download_pdf("https://example.com/test.pdf")
-        #assert result == mock_content
+        result = await self.processor._download_pdf("https://example.com/test.pdf")
+        assert result == mock_content
     
     @pytest.mark.asyncio
-    async def test_download_pdf_http_error(self):
+    @patch('aiohttp.ClientSession.get')
+    async def test_download_pdf_http_error(self,mock_function):
         """Test PDF download with HTTP error"""
         mock_response = MagicMock()
         mock_response.status = 404
         mock_response.reason = "Not Found"
         
-        mock_session = MagicMock()
-        mock_session.get.return_value.__aenter__.return_value = mock_response
+        mock_function.return_value.__aenter__.return_value = mock_response
         
-        with patch('aiohttp.ClientSession', return_value=mock_session):
-            with pytest.raises(URLError, match="HTTP 404"):
-                await self.processor._download_pdf("https://example.com/test.pdf")
+        with pytest.raises(URLError, match="HTTP 404"):
+            await self.processor._download_pdf("https://example.com/test.pdf")
     
     @pytest.mark.asyncio
-    async def test_download_pdf_file_too_large(self):
+    @patch('aiohttp.ClientSession.get')
+    async def test_download_pdf_file_too_large(self,mock_function):
         """Test PDF download with file too large"""
         large_size = str(self.processor.max_file_size + 1)
         
@@ -116,22 +140,19 @@ class TestPDFProcessor:
         mock_response.status = 200
         mock_response.headers = {'content-length': large_size}
         
-        mock_session = MagicMock()
-        mock_session.get.return_value.__aenter__.return_value = mock_response
+        mock_function.return_value.__aenter__.return_value = mock_response
         
-        with patch('aiohttp.ClientSession', return_value=mock_session):
-            with pytest.raises(URLError, match="File too large"):
-                await self.processor._download_pdf("https://example.com/test.pdf")
+        with pytest.raises(URLError, match="File too large"):
+            await self.processor._download_pdf("https://example.com/test.pdf")
     
     @pytest.mark.asyncio
-    async def test_download_pdf_timeout(self):
+    @patch('aiohttp.ClientSession.get')
+    async def test_download_pdf_timeout(self,mock_function):
         """Test PDF download with timeout"""
-        mock_session = MagicMock()
-        mock_session.get.side_effect = asyncio.TimeoutError()
-        
-        with patch('aiohttp.ClientSession', return_value=mock_session):
-            with pytest.raises(TimeoutError, match="Download timed out"):
-                await self.processor._download_pdf("https://example.com/test.pdf")
+        mock_function.return_value.__aenter__.side_effect = asyncio.TimeoutError()
+
+        with pytest.raises(TimeoutError, match="Download timed out"):
+            await self.processor._download_pdf("https://example.com/test.pdf")
     
     def test_extract_text_from_bytes_success(self):
         """Test successful text extraction from bytes"""

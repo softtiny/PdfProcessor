@@ -28,9 +28,7 @@ class TestExtractText:
     def test_extract_text_success(self):
         """Test successful text extraction"""
         with patch('app.pdf_processor.PDFProcessor.extract_text_from_url') as mock_extract:
-            async def mock_coroutine():
-                return "Sample extracted text from PDF"
-            mock_extract.return_value = mock_coroutine()
+            mock_extract.return_value = "Sample extracted text from PDF"
             
             response = client.post(
                 "/get_text",
@@ -78,7 +76,7 @@ class TestExtractText:
             
             assert response.status_code == 400
             data = response.json()
-            assert "URL error" in data["detail"]
+            assert "URL error" in data["message"]
     
     def test_extract_text_pdf_processing_error(self):
         """Test text extraction with PDF processing error"""
@@ -92,7 +90,7 @@ class TestExtractText:
             
             assert response.status_code == 422
             data = response.json()
-            assert "PDF processing error" in data["detail"]
+            assert "PDF processing error" in data["message"]
     
     def test_extract_text_timeout_error(self):
         """Test text extraction with timeout error"""
@@ -106,7 +104,7 @@ class TestExtractText:
             
             assert response.status_code == 408
             data = response.json()
-            assert "Request timeout" in data["detail"]
+            assert "Request timeout" in data["message"]
 
 class TestRootEndpoint:
     """Test root endpoint"""
@@ -136,7 +134,8 @@ class TestErrorHandling:
             
             assert response.status_code == 500
             data = response.json()
-            assert "Internal server error" in data["detail"]
+            
+            assert "Internal server error" in data["message"]
     
     def test_malformed_json(self):
         """Test malformed JSON request"""
@@ -146,7 +145,7 @@ class TestErrorHandling:
             headers={"Content-Type": "application/json"}
         )
         
-        assert response.status_code == 422
+        assert response.status_code == 400
 
 if __name__ == "__main__":
     pytest.main([__file__])

@@ -1,7 +1,7 @@
 """
 Pydantic models for request/response validation
 """
-from pydantic import BaseModel, HttpUrl, Field, validator
+from pydantic import BaseModel, HttpUrl, Field, field_validator
 from typing import Optional
 import re
 
@@ -9,7 +9,7 @@ class URLRequest(BaseModel):
     """Request model for PDF URL"""
     url: HttpUrl = Field(..., description="URL of the PDF to process")
     
-    @validator('url')
+    @field_validator('url')
     def validate_pdf_url(cls, v):
         """Validate that URL points to a PDF file"""
         url_str = str(v)
