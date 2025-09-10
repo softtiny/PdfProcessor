@@ -1,6 +1,7 @@
-name: test
+name: Pytest Run
 
-on: pull_request
+on:
+  workflow_call:
 
 jobs:
   linting:
