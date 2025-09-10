@@ -1,8 +1,7 @@
 name: Pytest Run
-
 on:
-  workflow_call:
-
+  workflow_dispatch:
+    
 jobs:
   linting:
     runs-on: ubuntu-latest
