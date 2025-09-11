@@ -63,9 +63,9 @@ jobs:
         run: |
           poetry lock
           poetry install --no-interaction --no-root
-      - run: python -m pip install coverage
       - name: Run tests
         run: |
           source .venv/bin/activate
+          python -m pip install coverage
           PYTHONWARNINGS="ignore::DeprecationWarning" coverage run -m pytest tests/
           coverage report
